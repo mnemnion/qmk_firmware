@@ -2,6 +2,14 @@
 
 import argparse
 import pycparser
+import sys
+
+sep = ""
+nl = "\n"
+
+if sys.version_info[0] >= 3:
+    sep = "\n"
+    nl = ""
 
 def beautify_src_file(filename):
     src = {
@@ -14,21 +22,21 @@ def beautify_src_file(filename):
         current_section = "before"
         for line in f:
             if current_section == "before":
-                if line == "const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {":
+                if line == "const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {" + nl:
                     current_section = "keys"
                     src[current_section].append("const int keymaps[]={")
                 else:
                     src[current_section].append(line)
             elif current_section == "keys":
                 src[current_section].append(line)
-                if line == "};":
+                if line == "};" + nl:
                     current_section = "after"
             else:
                 src[current_section].append(line)
 
-    output = "\n".join(src["before"]) + "\n" 
-    output += beautify_keys_section("\n".join(src["keys"])) + "\n"
-    output += "\n".join(src["after"]) + "\n"
+    output = sep.join(src["before"])
+    output += beautify_keys_section(sep.join(src["keys"])) + sep
+    output += sep.join(src["after"]) + sep
     return output
 
 def beautify_keys_section(src):
